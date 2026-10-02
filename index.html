@@ -798,15 +798,20 @@
         function simpanAbsensi(dataInput) {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwrv0NVFNNKSftbdMmWZ-YlPstAKVi9whH9I-yPeV1pGMWgPkSLDcOUqbDiHNBmXoA/exec';
 
+    // Menggunakan fetch dengan Content-Type text/plain agar tidak memicu pembatasan CORS browser
     fetch(scriptURL, {
         method: 'POST',
+        mode: 'no-cors',
+        headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+        },
         body: JSON.stringify(dataInput)
     })
-    .then(response => {
-        alert('Absensi berhasil terkirim!');
+    .then(() => {
+        alert('Data absensi berhasil dikirim!');
     })
     .catch(error => {
-        alert('Gagal mengirim absensi: ' + error.message);
+        alert('Gagal mengirim data: ' + error.message);
     });
 }
         /* 5. LAPORAN & EXPORT */
