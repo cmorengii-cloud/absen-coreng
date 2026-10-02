@@ -795,23 +795,60 @@
             });
         }
 
-        function simpanAbsensi(dataInput) {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwrv0NVFNNKSftbdMmWZ-YlPstAKVi9whH9I-yPeV1pGMWgPkSLDcOUqbDiHNBmXoA/exec';
+// Ganti dengan Web App URL yang disalin dari Apps Script
+const SCRIPT_URL = "TEMPEL_URL_WEB_APP_GOOGLE_APPS_SCRIPT_DI_SINI";
 
-    // Menggunakan fetch dengan Content-Type text/plain agar tidak memicu pembatasan CORS browser
-    fetch(scriptURL, {
-        method: 'POST',
-        mode: 'no-cors',
+function simpanAbsensi() {
+    const selectedKelas = document.getElementById('absen-select-kelas').value;
+    const selectedTanggal = document.getElementById('absen-tanggal').value;
+    
+    // Filter siswa berdasarkan kelas yang dipilih
+    const currentStudents = students.filter(s => s.kelas === selectedKelas);
+    
+    if (currentStudents.length === 0) {
+        alert("Tidak ada siswa di kelas ini.");
+        return;
+    }
+
+    // Ambil data status absensi tiap siswa dari form HTML
+    const dataDikirim = currentStudents.map(siswa => {
+        // Ambil nilai radio button status (Hadir/Sakit/Izin/Bolos)
+        const radioChecked = document.querySelector(`input[name="status-${siswa.id}"]:checked`);
+        const statusValue = radioChecked ? radioChecked.value : 'Belum Absen';
+
+        return {
+            "No Absen": siswa.noAbsen,
+            "Nama Siswa": siswa.nama,
+            "Kelas": siswa.kelas,
+            "Status Absensi": statusValue
+        };
+    });
+
+    // Simpan juga ke localStorage internal (opsional)
+    if (!attendance[selectedTanggal]) attendance[selectedTanggal] = {};
+    currentStudents.forEach(s => {
+        const radioChecked = document.querySelector(`input[name="status-${s.id}"]:checked`);
+        if (radioChecked) {
+            attendance[selectedTanggal][s.id] = radioChecked.value;
+        }
+    });
+    saveData();
+
+    // Kirim data secara real-time ke Google Sheets via Cloud
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors", // Menghindari pembatasan CORS di HP/WhatsApp Browser
         headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
+            "Content-Type": "text/plain;charset=utf-8"
         },
-        body: JSON.stringify(dataInput)
+        body: JSON.stringify(dataDikirim)
     })
     .then(() => {
-        alert('Data absensi berhasil dikirim!');
+        alert("Absensi Kelas " + selectedKelas + " Berhasil Disimpan & Terkirim ke Google Sheets!");
     })
-    .catch(error => {
-        alert('Gagal mengirim data: ' + error.message);
+    .catch((error) => {
+        console.error("Error:", error);
+        alert("Gagal mengirim data ke server: " + error.message);
     });
 }
         /* 5. LAPORAN & EXPORT */
