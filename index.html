@@ -795,26 +795,20 @@
             });
         }
 
-        function simpanAbsensi() {
-            const tanggal = document.getElementById('absen-tanggal').value;
-            const selectedKelas = document.getElementById('absen-select-kelas').value;
-            const filteredSiswa = students.filter(s => s.kelas === selectedKelas);
+        function simpanAbsensi(dataInput) {
+    const scriptURL = 'TEMPEL_URL_WEB_APP_GOOGLE_APPS_SCRIPT_DI_SINI';
 
-            if (!tanggal) return alert('Pilih tanggal absensi!');
-
-            if (!attendance[tanggal]) attendance[tanggal] = {};
-
-            filteredSiswa.forEach(s => {
-                const radios = document.getElementsByName(`absen-${s.id}`);
-                radios.forEach(r => {
-                    if (r.checked) attendance[tanggal][s.id] = r.value;
-                });
-            });
-
-            saveData();
-            alert('Data absensi berhasil disimpan!');
-        }
-
+    fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(dataInput)
+    })
+    .then(response => {
+        alert('Absensi berhasil terkirim!');
+    })
+    .catch(error => {
+        alert('Gagal mengirim absensi: ' + error.message);
+    });
+}
         /* 5. LAPORAN & EXPORT */
         function toggleLaporFilter() {
             const jenis = document.getElementById('lapor-jenis').value;
